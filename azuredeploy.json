@@ -1,0 +1,92 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "EngineerAlias": {
+      "type": "string",
+      "defaultValue": "MsAlias",
+      "metadata": {
+        "description": "Engineer MS Alias"
+      }
+    }
+  },
+  "variables": {
+    "appServicePlanName": "[concat(parameters('EngineerAlias'),'-S2-ASP')]",
+    "appName": "[concat(parameters('EngineerAlias'),'-S1-APP')]",
+    "slotName": "[concat(parameters('EngineerAlias'),'-S1-testSlot')]",
+
+    "webApp-prod-URL": "https://github.com/amymcel/swapappproduction.git",
+    "webApp-slot-URL": "https://github.com/amymcel/swapapptestslot.git",
+    "webApp-branch": "main"
+  },
+  "resources": [
+    //web -------------------------------------------------------------
+    {
+      "name": "[variables('appServicePlanName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2018-02-01",
+      "location": "[resourceGroup().location]",
+      "properties": {},
+      "sku": {
+        "name": "S1",
+        "capacity": 0
+      },
+      "kind": "app"
+    },
+    {
+      "name": "[variables('appName')]",
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2018-11-01",
+      "location": "[resourceGroup().location]",
+      "kind": "app",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName'))]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName'))]"
+      },
+      "resources": [
+        {
+          "name": "web",
+          "type": "sourcecontrols",
+          "apiVersion": "2018-11-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', variables('appName'))]"
+          ],
+          "properties": {
+            "RepoUrl": "[variables('webApp-prod-URL')]",
+            "branch": "[variables('webApp-branch')]",
+            "IsManualIntegration": true
+          }
+        },
+        {
+          "name": "[variables('slotName')]",
+          "type": "slots",
+          "apiVersion": "2018-11-01",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', variables('appName'))]"
+          ],
+          "properties": {
+          },
+          "resources": [
+            {
+              "name": "web",
+              "type": "sourcecontrols",
+              "apiVersion": "2018-11-01",
+              "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', variables('appName'), variables('slotName'))]"
+              ],
+              "properties": {
+                "RepoUrl": "[variables('webApp-slot-URL')]",
+                "branch": "[variables('webApp-branch')]",
+                "IsManualIntegration": true
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "outputs": {}
+}
