@@ -15,8 +15,8 @@
     "appName": "[concat(parameters('EngineerAlias'),'-S1-APP')]",
     "slotName": "[concat(parameters('EngineerAlias'),'-S1-testSlot')]",
 
-    "webApp-prod-URL": "https://github.com/amymcel/AppService.Specialist.Config.Ase.1.App.Prod",
-    "webApp-slot-URL": "https://github.com/amymcel/AppService.Specialist.Config.Swap.1.App.Slot",
+    "webApp-prod-URL": "https://github.com/amymcel/AppService.Config.Specialist.Swap.1.App.Prod",
+    "webApp-slot-URL": "https://github.com/amymcel/AppService.Config.Specialist.Swap.1.App.Slot",
     "webApp-branch": "main"
   },
   "resources": [
